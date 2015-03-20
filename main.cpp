@@ -1,24 +1,55 @@
 #include <iostream>
-#include "rmq.h"
 #include <vector>
+#include <string>
 #include <limits.h>
+#include <stdio.h>
+#include "rmq.h"
+#include "suggester.h"
+
+struct Function_Max
+{
+    int operator ()(int a, int b)
+    {
+        return std::max(a, b);
+    }
+};
+
+/*struct String_Comparator
+{
+    int operator <(std::pair<std::string, long long> a, std::pair<std::string, long long> b)
+    {
+        return strcmp(a, std::string(b, 0, a.));
+    }
+};*/
+
+void read_data(std::vector<std::pair<std::string, long long> > &vocabulary,
+               size_t &voc_number, std::string &prefix, int &suggest_number)
+{
+    freopen("input.txt", "r", stdin);
+    std::cin >> voc_number;
+    vocabulary.clear();
+    vocabulary.reserve(voc_number);
+
+    for (size_t i = 0; i < voc_number; ++i)
+    {
+        std::string in_word;
+        long long in_freq;
+        std::cin >> in_word >> in_freq;
+        vocabulary.push_back(std::make_pair(in_word, in_freq));
+    }
+
+    std::cin >> prefix >> suggest_number;
+}
 
 int main()
 {
-    std::vector<int> data = {1, 2, 10, 505, 18, 10};
+    size_t voc_number;
+    std::vector<std::pair<std::string, long long> > vocabulary;
+    std::string prefix;
+    int suggest_number;
 
-    struct f
-    {
-        int operator ()(int a, int b)
-        {
-            return std::max(a, b);
-        }
-    } my_max;
+    read_data(vocabulary, voc_number,prefix, suggest_number);
 
-    RMQ<int, f> tree(data, my_max, INT_MIN);
-
-    for (int i = 1; i < 6; ++i)
-       std::cout << tree.count_RMQ(i, 5) << '\n';
-
+    std::sort(vocabulary.begin(), vocabulary.end());
     return 0;
 }
