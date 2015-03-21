@@ -3,20 +3,7 @@
 #include "rmq.h"
 #include "suggester.h"
 
-/*bool operator <(Word &element, Word &key)
-{
-    if (element.first.size() < key.first.size())
-    {
-        return true;
-    }
-
-    std::string el_prefix = std::string(element.first, 0, key.first.size());
-
-    return el_prefix < key.first;
-    return element.second > key.second;
-}*/
-
-struct CMP
+struct CMP_Lower
 {
     bool operator ()(const Word &element, const Word &key) const
     {
@@ -31,7 +18,7 @@ struct CMP
     }
 };
 
-struct CMP2
+struct CMP_Upper
 {
     bool operator ()(const Word &key, const Word &element) const
     {
@@ -43,6 +30,17 @@ struct CMP2
         std::string el_prefix = std::string(element.first, 0, key.first.size());
 
         return key.first < el_prefix;
+    }
+};
+
+struct Voc_Max
+{
+    Word operator()(const Word &a, const Word &b)
+    {
+        if (a.second > b.second)
+            return a;
+        else
+            return b;
     }
 };
 
@@ -75,16 +73,24 @@ void Suggester::make_suggest(std::string prefix, int suggest_number)
     Word search = {prefix, 0};
     //Word search2 = {"aab", 0};
     //assert(search < search2);
-    CMP my_cmp;
+    CMP_Lower cmp_lower;
     //assert(my_cmp(search, search));
 
     std::vector<Word>::iterator start = std::lower_bound(vocabulary.begin(),
-                                                   vocabulary.end(), search, my_cmp);
-    CMP2 my_cmp2;
+                                                   vocabulary.end(), search, cmp_lower);
+    CMP_Upper cmp_upper;
     std::vector<Word>::iterator end = std::upper_bound(vocabulary.begin(),
-                                                   vocabulary.end(), search, my_cmp2);
+                                                   vocabulary.end(), search, cmp_upper);
     print_voc(start, end);
-    //std::cout << start - vocabulary.begin() << '\n';
+    std::cout << start - vocabulary.begin() << '\n';
+
+    Voc_Max voc_max;
+    Word neutral = {"", -1};
+    std::vector<Word> range(start, end);
+
+    RMQ<Word, Voc_Max> tree(range, voc_max, neutral);
+    Word max = tree.count_RMQ(0, range.size() - 1);
+    std::cout << max.first << ' ' << max.second << '\n';
 
 
 }
