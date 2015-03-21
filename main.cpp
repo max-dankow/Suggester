@@ -3,29 +3,13 @@
 #include <string>
 #include <limits.h>
 #include <stdio.h>
-#include "rmq.h"
 #include "suggester.h"
 
-struct Function_Max
-{
-    int operator ()(int a, int b)
-    {
-        return std::max(a, b);
-    }
-};
-
-/*struct String_Comparator
-{
-    int operator <(std::pair<std::string, long long> a, std::pair<std::string, long long> b)
-    {
-        return strcmp(a, std::string(b, 0, a.));
-    }
-};*/
-
-void read_data(std::vector<std::pair<std::string, long long> > &vocabulary,
-               size_t &voc_number, std::string &prefix, int &suggest_number)
+void read_data(std::vector<Word> &vocabulary,
+               std::string &prefix, int &suggest_number)
 {
     freopen("input.txt", "r", stdin);
+    size_t voc_number;
     std::cin >> voc_number;
     vocabulary.clear();
     vocabulary.reserve(voc_number);
@@ -43,13 +27,14 @@ void read_data(std::vector<std::pair<std::string, long long> > &vocabulary,
 
 int main()
 {
-    size_t voc_number;
-    std::vector<std::pair<std::string, long long> > vocabulary;
+    std::vector<Word> vocabulary;
     std::string prefix;
     int suggest_number;
 
-    read_data(vocabulary, voc_number,prefix, suggest_number);
-
-    std::sort(vocabulary.begin(), vocabulary.end());
+    read_data(vocabulary, prefix, suggest_number);
+    prefix = "abc";
+    Suggester suggester(vocabulary);
+    //suggester.print_voc();
+    suggester.make_suggest(prefix, suggest_number);
     return 0;
 }
