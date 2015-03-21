@@ -3,10 +3,12 @@
 #include <assert.h>
 
 template <typename Value, typename Functor>
-class RMQ
+class Segment_Tree
 {
 public:
-    RMQ(std::vector<Value> input_data, const Functor &new_function, Value new_neutral_value);
+    Segment_Tree(std::vector<Value> input_data, const Functor &new_function, Value new_neutral_value);
+    Segment_Tree();
+    void init_tree(std::vector<Value> input_data, const Functor &new_function, Value new_neutral_value);
     Value count_RMQ(size_t seek_left, size_t seek_right);
 private:
     size_t get_parent(const size_t index) const;
@@ -24,25 +26,25 @@ private:
 };
 
 template <typename Value, typename Functor>
-size_t RMQ<Value, Functor>::get_parent(const size_t index) const
+size_t Segment_Tree<Value, Functor>::get_parent(const size_t index) const
 {
     return index / 2;
 }
 
 template <typename Value, typename Functor>
-size_t RMQ<Value, Functor>::get_son_left(const size_t index) const
+size_t Segment_Tree<Value, Functor>::get_son_left(const size_t index) const
 {
     return index * 2;
 }
 
 template <typename Value, typename Functor>
-size_t RMQ<Value, Functor>::get_son_right(const size_t index) const
+size_t Segment_Tree<Value, Functor>::get_son_right(const size_t index) const
 {
     return (index * 2) + 1;
 }
 
 template <typename Value, typename Functor>
-void RMQ<Value, Functor>::build(const std::vector<Value> &input_data)
+void Segment_Tree<Value, Functor>::build(const std::vector<Value> &input_data)
 {
     list_number = 1 << ((int) (log2(input_data.size() - 1)) + 1);
     data.resize(list_number * 2);
@@ -60,8 +62,8 @@ void RMQ<Value, Functor>::build(const std::vector<Value> &input_data)
 }
 
 template <typename Value, typename Functor>
-RMQ<Value, Functor>::RMQ(std::vector<Value> input_data, const Functor &new_function,
-                                   Value new_neutral_value)
+void Segment_Tree<Value, Functor>::init_tree(std::vector<Value> input_data, const Functor &new_function,
+                                             Value new_neutral_value)
 {
     function = new_function;
     neutral_value = new_neutral_value;
@@ -70,7 +72,19 @@ RMQ<Value, Functor>::RMQ(std::vector<Value> input_data, const Functor &new_funct
 }
 
 template <typename Value, typename Functor>
-Value RMQ<Value, Functor>::count_RMQ(size_t index, size_t seek_left, size_t seek_right,
+Segment_Tree<Value, Functor>::Segment_Tree(std::vector<Value> input_data, const Functor &new_function,
+                                   Value new_neutral_value)
+{
+    init_tree(input_data, new_function, new_neutral_value);
+}
+
+template <typename Value, typename Functor>
+Segment_Tree<Value, Functor>::Segment_Tree()
+{
+}
+
+template <typename Value, typename Functor>
+Value Segment_Tree<Value, Functor>::count_RMQ(size_t index, size_t seek_left, size_t seek_right,
                                      size_t bound_left, size_t bound_right)
 {
     if (seek_left > seek_right)
@@ -93,7 +107,7 @@ Value RMQ<Value, Functor>::count_RMQ(size_t index, size_t seek_left, size_t seek
 }
 
 template <typename Value, typename Functor>
-Value RMQ<Value, Functor>::count_RMQ(size_t seek_left, size_t seek_right)
+Value Segment_Tree<Value, Functor>::count_RMQ(size_t seek_left, size_t seek_right)
 {
     if (seek_right >= real_number)
     {

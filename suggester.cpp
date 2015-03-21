@@ -1,48 +1,6 @@
 #include <algorithm>
 #include <iostream>
-#include "rmq.h"
 #include "suggester.h"
-
-struct CMP_Lower
-{
-    bool operator ()(const Word &element, const Word &key) const
-    {
-        if (element.first.size() < key.first.size())
-        {
-            return element.first < key.first;
-        }
-
-        std::string el_prefix = std::string(element.first, 0, key.first.size());
-
-        return el_prefix < key.first;
-    }
-};
-
-struct CMP_Upper
-{
-    bool operator ()(const Word &key, const Word &element) const
-    {
-        if (element.first.size() < key.first.size())
-        {
-            return key.first < element.first;
-        }
-
-        std::string el_prefix = std::string(element.first, 0, key.first.size());
-
-        return key.first < el_prefix;
-    }
-};
-
-struct Voc_Max
-{
-    Word operator()(const Word &a, const Word &b)
-    {
-        if (a.second > b.second)
-            return a;
-        else
-            return b;
-    }
-};
 
 void Suggester::print_voc(std::vector<Word>::iterator start, std::vector<Word>::iterator end)const
 {
@@ -64,33 +22,57 @@ Suggester::Suggester(const std::vector<Word> &input_vocabulary)
 {
     vocabulary = input_vocabulary;
     std::sort(vocabulary.begin(), vocabulary.end());
+    Voc_Max voc_max;
+    Word neutral = {"", -1};
+    segment_tree.init_tree(vocabulary, voc_max, neutral);
+}
+
+void Suggester::find_k_maximum(size_t left, size_t right, int k)
+{
+    //element of heap with comparator
+    struct Node
+    {
+        size_t bound_left, bound_right;
+        Word maximum;
+        bool operator ()(const Node &a, const Node &b)
+        {
+            return a.maximum < b.maximum;
+        }
+    } comparator;
+
+    if (k < 1)
+        return;
+
+    std::vector<Node> segment_heap(1);
+    //Node init_node = {}
+    segment_heap[0] = {left, right, segment_tree.count_RMQ(left, right)};
+    //segment_heap[0].bound_right = right;
+    //segment_heap[0].maximum = segment_tree.count_RMQ(left, right);
+    std::push_heap(segment_heap.begin(), segment_heap.end(), comparator);
+
+    for (int i = 0; i < k; ++i)
+    {
+        Node current_node = segment_heap.front();
+        std::push_heap(segment_heap.begin(), segment_heap.end(), comparator);
+        segment_heap.pop_back();
+    }
 }
 
 void Suggester::make_suggest(std::string prefix, int suggest_number)
 {
-    //String_Comparator cmp;
+    Word to_search = {prefix, 0};
 
-    Word search = {prefix, 0};
-    //Word search2 = {"aab", 0};
-    //assert(search < search2);
     CMP_Lower cmp_lower;
-    //assert(my_cmp(search, search));
-
     std::vector<Word>::iterator start = std::lower_bound(vocabulary.begin(),
-                                                   vocabulary.end(), search, cmp_lower);
+                                                   vocabulary.end(), to_search, cmp_lower);
     CMP_Upper cmp_upper;
     std::vector<Word>::iterator end = std::upper_bound(vocabulary.begin(),
-                                                   vocabulary.end(), search, cmp_upper);
-    print_voc(start, end);
-    std::cout << start - vocabulary.begin() << '\n';
-
-    Voc_Max voc_max;
-    Word neutral = {"", -1};
+                                                   vocabulary.end(), to_search, cmp_upper);
     std::vector<Word> range(start, end);
 
-    RMQ<Word, Voc_Max> tree(range, voc_max, neutral);
-    Word max = tree.count_RMQ(0, range.size() - 1);
-    std::cout << max.first << ' ' << max.second << '\n';
+    print_voc(start, end);
+    find_k_maximum(start - vocabulary.begin(), end - vocabulary.begin() - 1, suggest_number);
 
-
+    //Word max = segment_tree.count_RMQ(0, range.size() - 1);
+    //std::cout << max.first << ' ' << max.second << '\n';
 }
