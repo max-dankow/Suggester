@@ -84,7 +84,7 @@ void Suggester::make_suggest(std::string prefix, int suggest_number)
     std::vector<Word>::iterator end = std::upper_bound(vocabulary.begin(),
                                                    vocabulary.end(), search, my_cmp2);
     print_voc(start, end);
-    std::cout << start - vocabulary.begin() << '\n';
+    //std::cout << start - vocabulary.begin() << '\n';
 
 
 }
