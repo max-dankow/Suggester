@@ -38,8 +38,8 @@ void read_vocabulary(char *file_name, std::vector<Word> &vocabulary)
             fprintf(stderr, "Wrong input.\n");
             exit(1);
         }
-
-        vocabulary.push_back(std::make_pair(in_word, in_freq));
+        Word input = {in_word, in_freq, 0};
+        vocabulary.push_back(input);
     }
 
     //std::cin >> prefix >> suggest_number;

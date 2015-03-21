@@ -2,21 +2,26 @@
 #include <string>
 #include "rmq.h"
 
-typedef std::pair<std::string, long long> Word;
+struct Word
+{
+    std::string text;
+    long long freq;
+    size_t index;
+};
 
 //lower_bound comparator
 struct CMP_Lower
 {
     bool operator ()(const Word &element, const Word &key) const
     {
-        if (element.first.size() < key.first.size())
+        if (element.text.size() < key.text.size())
         {
-            return element.first < key.first;
+            return element.text < key.text;
         }
 
-        std::string el_prefix = std::string(element.first, 0, key.first.size());
+        std::string el_prefix = std::string(element.text, 0, key.text.size());
 
-        return el_prefix < key.first;
+        return el_prefix < key.text;
     }
 };
 
@@ -25,14 +30,14 @@ struct CMP_Upper
 {
     bool operator ()(const Word &key, const Word &element) const
     {
-        if (element.first.size() < key.first.size())
+        if (element.text.size() < key.text.size())
         {
-            return key.first < element.first;
+            return key.text < element.text;
         }
 
-        std::string el_prefix = std::string(element.first, 0, key.first.size());
+        std::string el_prefix = std::string(element.text, 0, key.text.size());
 
-        return key.first < el_prefix;
+        return key.text < el_prefix;
     }
 };
 
@@ -41,7 +46,7 @@ struct Voc_Max
 {
     Word operator()(const Word &a, const Word &b)
     {
-        if (a.second > b.second)
+        if (a.freq > b.freq)
             return a;
         else
             return b;

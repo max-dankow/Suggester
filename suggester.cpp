@@ -2,6 +2,11 @@
 #include <iostream>
 #include "suggester.h"
 
+bool operator <(const Word &a, const Word &b)
+{
+    return a.text < b.text;
+}
+
 void Suggester::print_voc(std::vector<Word>::iterator start, std::vector<Word>::iterator end)const
 {
     for (auto it = vocabulary.begin(); it != vocabulary.end(); ++it)
@@ -11,7 +16,7 @@ void Suggester::print_voc(std::vector<Word>::iterator start, std::vector<Word>::
             std::cout << "->    ";
         }
 
-        std::cout << (*it).first << ' ' << (*it).second << '\n';
+        std::cout << (*it).text << ' ' << (*it).freq << '\n';
     }
 
     std::cout << '\n';
@@ -22,8 +27,14 @@ Suggester::Suggester(const std::vector<Word> &input_vocabulary)
 {
     vocabulary = input_vocabulary;
     std::sort(vocabulary.begin(), vocabulary.end());
+
+    for (size_t i = 0; i < vocabulary.size(); ++i)
+    {
+        vocabulary[i].index = i;
+    }
+
     Voc_Max voc_max;
-    Word neutral = {"", -1};
+    Word neutral = {"", -1, 0};
     segment_tree.init_tree(vocabulary, voc_max, neutral);
 }
 
@@ -36,7 +47,7 @@ void Suggester::find_k_maximum(size_t left, size_t right, int k)
         Word maximum;
         bool operator ()(const Node &a, const Node &b)
         {
-            return a.maximum < b.maximum;
+            return a.maximum.freq < b.maximum.freq;
         }
     } comparator;
 
@@ -60,7 +71,7 @@ void Suggester::find_k_maximum(size_t left, size_t right, int k)
 
 void Suggester::make_suggest(std::string prefix, int suggest_number)
 {
-    Word to_search = {prefix, 0};
+    Word to_search = {prefix, 0, 0};
 
     CMP_Lower cmp_lower;
     std::vector<Word>::iterator start = std::lower_bound(vocabulary.begin(),
