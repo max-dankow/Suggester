@@ -70,7 +70,12 @@ int main()
             return 1;
         }
 
-        suggester.make_suggest(prefix, suggest_number);
+        std::vector<Word> answer = suggester.make_suggest(prefix, suggest_number);
+
+        for (Word out:answer)
+        {
+            std::cout << out.text << ' ' << out.freq << '\n';
+        }
 
         //vocabulary.push_back(std::make_pair(in_word, in_freq));
     }

@@ -57,10 +57,10 @@ class Suggester
 {
 public:
     Suggester(const std::vector<Word> &input_vocabulary);
-    void make_suggest(std::string prefix, int suggest_number);
+    std::vector<Word> make_suggest(std::string prefix, int suggest_number);
     void print_voc(std::vector<Word>::iterator start, std::vector<Word>::iterator end)const;
 private:
-    void find_k_maximum(size_t left, size_t right, int k);
+    std::vector<Word> find_k_maximum(size_t left, size_t right, int k);
 
     Segment_Tree<Word, Voc_Max> segment_tree;
     std::vector<Word> vocabulary;
