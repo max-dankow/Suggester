@@ -9,7 +9,6 @@
 
 void read_vocabulary(char *file_name, std::vector<Word> &vocabulary)
 {
-    //FILE *voc_file = freopen(file_name, "r", stdin);
     std::ifstream voc_file(file_name);
 
     if (!voc_file)
@@ -76,9 +75,6 @@ int main()
         {
             std::cout << out.text << ' ' << out.freq << '\n';
         }
-
-        //vocabulary.push_back(std::make_pair(in_word, in_freq));
     }
-    //suggester.print_voc();
     return 0;
 }

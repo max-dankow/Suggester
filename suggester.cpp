@@ -2,9 +2,49 @@
 #include <iostream>
 #include "suggester.h"
 
-bool operator <(const Word &a, const Word &b)
+bool operator<(const Word &a, const Word &b)
 {
     return a.text < b.text;
+}
+
+//lower_bound comparator
+/*struct CMP_Lower
+{
+    bool operator ()(const Word &element, const Word &key) const
+    {
+        if (element.text.size() < key.text.size())
+        {
+            return element.text < key.text;
+        }
+
+        std::string el_prefix = std::string(element.text, 0, key.text.size());
+
+        return el_prefix < key.text;
+    }
+};*/
+
+bool cmp_bin_lower(const Word &element, const Word &key)
+{
+    if (element.text.size() < key.text.size())
+    {
+        return element.text < key.text;
+    }
+
+    std::string el_prefix = std::string(element.text, 0, key.text.size());
+
+    return el_prefix < key.text;
+}
+
+bool cmp_bin_upper(const Word &key, const Word &element)
+{
+    if (element.text.size() < key.text.size())
+    {
+        return key.text < element.text;
+    }
+
+    std::string el_prefix = std::string(element.text, 0, key.text.size());
+
+    return key.text < el_prefix;
 }
 
 void Suggester::print_voc(std::vector<Word>::iterator start, std::vector<Word>::iterator end)const
@@ -23,7 +63,8 @@ void Suggester::print_voc(std::vector<Word>::iterator start, std::vector<Word>::
 }
 
 
-Suggester::Suggester(const std::vector<Word> &input_vocabulary)
+/*Suggester::Suggester(const std::vector<Word> &input_vocabulary):
+    segment_tree(input_vocabulary, voc_max, neutral)
 {
     vocabulary = input_vocabulary;
     std::sort(vocabulary.begin(), vocabulary.end());
@@ -36,7 +77,7 @@ Suggester::Suggester(const std::vector<Word> &input_vocabulary)
     Voc_Max voc_max;
     Word neutral = {"", -1, 0};
     segment_tree.init_tree(vocabulary, voc_max, neutral);
-}
+}*/
 
 std::vector<Word> Suggester::find_k_maximum(size_t left, size_t right, int k)
 {
@@ -97,12 +138,14 @@ std::vector<Word> Suggester::make_suggest(std::string prefix, int suggest_number
 {
     Word to_search = {prefix, 0, 0};
 
-    CMP_Lower cmp_lower;
+    //CMP_Lower cmp_lower;
     std::vector<Word>::iterator start = std::lower_bound(vocabulary.begin(),
-                                                   vocabulary.end(), to_search, cmp_lower);
-    CMP_Upper cmp_upper;
+                                                         vocabulary.end(),
+                                                         to_search, cmp_bin_lower);
+    //CMP_Upper cmp_upper;
     std::vector<Word>::iterator end = std::upper_bound(vocabulary.begin(),
-                                                   vocabulary.end(), to_search, cmp_upper);
+                                                       vocabulary.end(),
+                                                       to_search, cmp_bin_upper);
     std::vector<Word> range(start, end);
 
     print_voc(start, end);
